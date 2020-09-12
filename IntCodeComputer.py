@@ -2,6 +2,7 @@ class IntCodeComputer:
     def __init__(self, codes=[], inputs=[]):
         self.__codes = list(codes)
         self.__inputs = inputs
+        self.__innerInputs = []
         self.reset()
 
     def reset(self):
@@ -105,15 +106,17 @@ class IntCodeComputer:
                 if len(self.__inputs) > 0:
                     inputValue = self.__inputs.pop(0)
                     if not asciiMode:
-                        print(f'Input your value: {inputValue} [PRESET]')
+                        print(f'Input: {inputValue} [PRESET]')
                     else:
                         print(chr(inputValue), end='')
+                elif len(self.__innerInputs) > 0:
+                    inputValue = self.__innerInputs.pop(0)
                 else:
-                    userInput = input('Input your value: ')
+                    userInput = input('Input: ')
                     if asciiMode:
                         codeList = self.__convertToAsciiList(userInput)
                         inputValue = codeList.pop(0)
-                        self.appendInputs(codeList)
+                        self.__innerInputs += codeList
                     else:
                         inputValue = userInput
                 position = self.__getPosition(firstType, self.__pointer+1)
@@ -126,9 +129,9 @@ class IntCodeComputer:
                     try:
                         print(chr(result), end='')
                     except ValueError:
-                        print(f'Output value is: {result}. [TO LARGE IN ASCII MODE]')
+                        print(f'Output: {result}. [TO LARGE IN ASCII MODE]')
                 else:
-                    print(f'Output value is: {result}.')
+                    print(f'Output: {result}.')
                 self.__pointer += 2
                 return result
             elif opCode == 9:

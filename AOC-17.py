@@ -32,7 +32,7 @@ def partOne():
 def partTwo():
     codes[0] = 2
     robot = IntCodeComputer(codes)
-    robot.appendInputs(['A,B,A,B,C,B,C,A,C,C', 'R,12,L,10,L,10', 'L,6,L,12,R,12,L,4', 'L,12,R,12,L,6'], asciiMode=True)
+    robot.appendInputs(['A,B,A,B,C,B,C,A,C,C', 'R,12,L,10,L,10', 'L,6,L,12,R,12,L,4', 'L,12,R,12,L,6', 'N'], asciiMode=True)
     while not robot.isEnd():
         output = robot.runToOutput(asciiMode=True)
     print(output)
