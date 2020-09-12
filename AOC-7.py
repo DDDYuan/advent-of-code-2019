@@ -17,9 +17,7 @@ def getAllEnd(amps):
     return True
 
 for permutation in itertools.permutations([5,6,7,8,9]):
-    amps = []
-    for setting in permutation:
-        amps.append(IntCodeComputer(codes, [setting]))
+    amps = [IntCodeComputer(codes, [setting]) for setting in permutation]
     currentIndex = 0
     amps[0].appendInputs([0])
     thruster = 0

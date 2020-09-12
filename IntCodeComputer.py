@@ -1,24 +1,21 @@
 class IntCodeComputer:
-    codes = None
-    pointer = 0
-    relativeBase = 0
-    inputs = None
-    end = False
-
     def __init__(self, codes=[], inputs=[]):
-        self.codes = codes + 10000000*[0]
-        self.inputs = inputs
+        self.__codes = codes
+        self.__inputs = inputs
+        self.reset()
 
     def reset(self):
-        self.pointer = 0
+        self.__pointer = 0
+        self.__relativeBase = 0
+        self.__end = False
 
     def isEnd(self):
-        return self.end
+        return self.__end
 
     def appendInputs(self, inputs):
-        self.inputs = self.inputs + inputs
+        self.__inputs = self.__inputs + inputs
 
-    def parseCommandMode(self, code):
+    def __parseCommandMode(self, code):
         fullCommand = str(code).rjust(5, '0')
         opCode = fullCommand[-2:]
         firstType = fullCommand[-3]
@@ -26,92 +23,103 @@ class IntCodeComputer:
         outType = fullCommand[-5]
         return (int(opCode), int(firstType), int(secondType), int(outType))
 
-    def parseValue(self, type, parameterPosition):
+    def __getValue(self, type, parameterPosition):
         if type == 0:
-            return self.codes[self.codes[parameterPosition]]
+            return self.__codes[self.__codes[parameterPosition]]
         elif type == 1:
-            return self.codes[parameterPosition]
+            return self.__codes[parameterPosition]
         elif type == 2:
-            return self.codes[self.relativeBase + self.codes[parameterPosition]]
+            return self.__codes[self.__relativeBase + self.__codes[parameterPosition]]
         else:
-            print('INVALID PARAMETER TYPE: ' + str(type))
-            return None
+            raise Exception(f'INVALID PARAMETER TYPE: {type}.')
 
-    def getPosition(self, type, index):
+    def __getPosition(self, type, index):
         if type == 0:
-            return self.codes[index]
+            position = self.__codes[index]
         elif type == 1:
-            return index
+            position = index
         elif type == 2:
-            return self.codes[index] + self.relativeBase
+            position = self.__codes[index] + self.__relativeBase
         else:
-            print('INVALID PARAMETER TYPE: ' + str(type))
-            return None
+            raise Exception(f'INVALID PARAMETER TYPE: {type}.')
+        if position >= len(self.__codes):
+            memoryTimes = position // len(self.__codes)
+            print(f'Extend memory to {memoryTimes+1} times large.')
+            self.__codes = self.__codes + [0] * memoryTimes * len(self.__codes)
+        return position
 
-    def runToOutput(self):
-        while not self.end:
-            current = self.codes[self.pointer]
-            (opCode, firstType, secondType, outType) = self.parseCommandMode(current)
+    def runToOutput(self, asciiMode=False):
+        while not self.__end:
+            current = self.__codes[self.__pointer]
+            (opCode, firstType, secondType, outType) = self.__parseCommandMode(current)
             if opCode == 1:
-                firstNumber = self.parseValue(firstType, self.pointer+1)
-                secondNumber = self.parseValue(secondType, self.pointer+2)
-                self.codes[self.getPosition(outType, self.pointer+3)] = firstNumber + secondNumber
-                self.pointer += 4
+                firstNumber = self.__getValue(firstType, self.__pointer+1)
+                secondNumber = self.__getValue(secondType, self.__pointer+2)
+                position = self.__getPosition(outType, self.__pointer+3)
+                self.__codes[position] = firstNumber + secondNumber
+                self.__pointer += 4
                 continue
             elif opCode == 2:
-                firstNumber = self.parseValue(firstType, self.pointer+1)
-                secondNumber = self.parseValue(secondType, self.pointer+2)
-                self.codes[self.getPosition(outType, self.pointer+3)] = firstNumber * secondNumber
-                self.pointer += 4
+                firstNumber = self.__getValue(firstType, self.__pointer+1)
+                secondNumber = self.__getValue(secondType, self.__pointer+2)
+                position = self.__getPosition(outType, self.__pointer+3)
+                self.__codes[position] = firstNumber * secondNumber
+                self.__pointer += 4
                 continue
             elif opCode == 5:
-                condition = self.parseValue(firstType, self.pointer+1)
+                condition = self.__getValue(firstType, self.__pointer+1)
                 if condition != 0:
-                    self.pointer = self.parseValue(secondType, self.pointer+2)
+                    self.__pointer = self.__getValue(secondType, self.__pointer+2)
                 else:
-                    self.pointer += 3
+                    self.__pointer += 3
                 continue
             elif opCode == 6:
-                condition = self.parseValue(firstType, self.pointer+1)
+                condition = self.__getValue(firstType, self.__pointer+1)
                 if condition == 0:
-                    self.pointer = self.parseValue(secondType, self.pointer+2)
+                    self.__pointer = self.__getValue(secondType, self.__pointer+2)
                 else:
-                    self.pointer += 3
+                    self.__pointer += 3
                 continue
             elif opCode == 7:
-                firstNumber = self.parseValue(firstType, self.pointer+1)
-                secondNumber = self.parseValue(secondType, self.pointer+2)
-                self.codes[self.getPosition(outType, self.pointer+3)] = 1 if firstNumber < secondNumber else 0
-                self.pointer += 4
+                firstNumber = self.__getValue(firstType, self.__pointer+1)
+                secondNumber = self.__getValue(secondType, self.__pointer+2)
+                position = self.__getPosition(outType, self.__pointer+3)
+                self.__codes[position] = 1 if firstNumber < secondNumber else 0
+                self.__pointer += 4
                 continue
             elif opCode == 8:
-                firstNumber = self.parseValue(firstType, self.pointer+1)
-                secondNumber = self.parseValue(secondType, self.pointer+2)
-                self.codes[self.getPosition(outType, self.pointer+3)] = 1 if firstNumber == secondNumber else 0
-                self.pointer += 4
+                firstNumber = self.__getValue(firstType, self.__pointer+1)
+                secondNumber = self.__getValue(secondType, self.__pointer+2)
+                position = self.__getPosition(outType, self.__pointer+3)
+                self.__codes[position] = 1 if firstNumber == secondNumber else 0
+                self.__pointer += 4
                 continue
             elif opCode == 3:
-                inputValue = self.inputs.pop(0) if len(
-                    self.inputs) > 0 else int(input('Provide your input: '))
-                print('Set input value ' + str(inputValue))
-                position = self.codes[self.pointer+1] if firstType == 0 else self.codes[self.pointer+1] + self.relativeBase
-                self.codes[position] = inputValue
-                self.pointer += 2
+                if len(self.__inputs) > 0:
+                    inputValue = self.__inputs.pop(0)
+                    print(f'Input your value: {inputValue} [PRESET]')
+                else:
+                    inputValue = input('Input your value: ')
+                position = self.__getPosition(firstType, self.__pointer+1)
+                self.__codes[position] = int(inputValue)
+                self.__pointer += 2
                 continue
             elif opCode == 4:
-                result = self.parseValue(firstType, self.pointer+1)
-                print('Output. value is ' + str(result))
-                self.pointer += 2
+                result = self.__getValue(firstType, self.__pointer+1)
+                if asciiMode:
+                    print(chr(result), end='')
+                else:
+                    print(f'Output value is: {result}.')
+                self.__pointer += 2
                 return result
             elif opCode == 9:
-                self.relativeBase += self.parseValue(firstType, self.pointer+1)
-                self.pointer += 2
+                self.__relativeBase += self.__getValue(firstType, self.__pointer+1)
+                self.__pointer += 2
                 continue
             elif opCode == 99:
                 print('Run to end.')
-                self.end = True
+                self.__end = True
                 continue
             else:
-                print('NOT A VALID CODE: ' + str(opCode))
-                return None
-        return None
+                raise Exception(f'NOT A VALID CODE: {opCode}.')
+        return
