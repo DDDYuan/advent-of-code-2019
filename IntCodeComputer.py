@@ -1,6 +1,6 @@
 class IntCodeComputer:
     def __init__(self, codes=[], inputs=[]):
-        self.__codes = codes
+        self.__codes = list(codes)
         self.__inputs = inputs
         self.reset()
 
@@ -12,8 +12,12 @@ class IntCodeComputer:
     def isEnd(self):
         return self.__end
 
-    def appendInputs(self, inputs):
-        self.__inputs = self.__inputs + inputs
+    def appendInputs(self, inputs, asciiMode=False):
+        if not asciiMode:
+            self.__inputs = self.__inputs + inputs
+        else:
+            for input in inputs:
+                self.__inputs += self.__convertToAsciiList(input)
 
     def __parseCommandMode(self, code):
         fullCommand = str(code).rjust(5, '0')
@@ -47,6 +51,9 @@ class IntCodeComputer:
             print(f'Extend memory to {memoryTimes+1} times large.')
             self.__codes = self.__codes + [0] * memoryTimes * len(self.__codes)
         return position
+
+    def __convertToAsciiList(self, inputValue):
+        return [ord(char) for char in inputValue] + [10]
 
     def runToOutput(self, asciiMode=False):
         while not self.__end:
@@ -97,9 +104,18 @@ class IntCodeComputer:
             elif opCode == 3:
                 if len(self.__inputs) > 0:
                     inputValue = self.__inputs.pop(0)
-                    print(f'Input your value: {inputValue} [PRESET]')
+                    if not asciiMode:
+                        print(f'Input your value: {inputValue} [PRESET]')
+                    else:
+                        print(chr(inputValue), end='')
                 else:
-                    inputValue = input('Input your value: ')
+                    userInput = input('Input your value: ')
+                    if asciiMode:
+                        codeList = self.__convertToAsciiList(userInput)
+                        inputValue = codeList.pop(0)
+                        self.appendInputs(codeList)
+                    else:
+                        inputValue = userInput
                 position = self.__getPosition(firstType, self.__pointer+1)
                 self.__codes[position] = int(inputValue)
                 self.__pointer += 2
@@ -107,7 +123,10 @@ class IntCodeComputer:
             elif opCode == 4:
                 result = self.__getValue(firstType, self.__pointer+1)
                 if asciiMode:
-                    print(chr(result), end='')
+                    try:
+                        print(chr(result), end='')
+                    except ValueError:
+                        print(f'Output value is: {result}. [TO LARGE IN ASCII MODE]')
                 else:
                     print(f'Output value is: {result}.')
                 self.__pointer += 2
@@ -117,7 +136,7 @@ class IntCodeComputer:
                 self.__pointer += 2
                 continue
             elif opCode == 99:
-                print('Run to end.')
+                print('\nRun to end.')
                 self.__end = True
                 continue
             else:
