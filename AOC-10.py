@@ -1,4 +1,4 @@
-map = [
+starMap = [
     '..............#.#...............#....#....',
     '#.##.......#....#.#..##........#...#......',
     '..#.....#....#..#.#....#.....#.#.##..#..#.',
@@ -42,3 +42,27 @@ map = [
     '........#....#..###..##....#.#.......##..#',
     '.................##............#.......#..'
 ]
+
+starPositions = []
+
+def calculateDifference(position1, position2):
+    if position1['x'] == position2['x']:
+        if position1['y'] == position2['y']:
+            return None
+        elif position1['y'] < position2['y']:
+            return float('inf')
+        else:
+            return float('-inf')
+    return (position2['y'] - position1['y']) / (position2['x'] - position1['x'])
+
+def calculateVisibleStars(currentPosition):
+    return len(set(map(lambda position: calculateDifference(currentPosition, position), starPositions))) + 1
+
+for y in range(len(starMap)):
+    for x in range(len(starMap[y])):
+        if starMap[y][x] == '#':
+            starPositions.append(dict({'x': x, 'y': y}))
+
+
+print(len(starPositions))
+print(max(list(map(calculateVisibleStars, starPositions))))
