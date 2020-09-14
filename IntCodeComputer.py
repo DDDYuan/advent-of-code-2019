@@ -28,15 +28,9 @@ class IntCodeComputer:
         outType = fullCommand[-5]
         return (int(opCode), int(firstType), int(secondType), int(outType))
 
-    def __getValue(self, type, parameterPosition):
-        if type == 0:
-            return self.__codes[self.__codes[parameterPosition]]
-        elif type == 1:
-            return self.__codes[parameterPosition]
-        elif type == 2:
-            return self.__codes[self.__relativeBase + self.__codes[parameterPosition]]
-        else:
-            raise Exception(f'INVALID PARAMETER TYPE: {type}.')
+    def __getValue(self, type, index):
+        position = self.__getPosition(type, index)
+        return self.__codes[position]
 
     def __getPosition(self, type, index):
         if type == 0:
