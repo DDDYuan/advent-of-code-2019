@@ -76,9 +76,9 @@ def printGraph():
     for y in range(len(graph)):
         for x in range(len(graph[y])):
             if graph[y][x] == 1:
-                print('#', end='')
+                print('[]', end='')
             else:
-                print(' ', end='')
+                print('  ', end='')
         print('')
 
 

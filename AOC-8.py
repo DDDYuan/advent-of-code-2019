@@ -21,5 +21,6 @@ for index in range(width*height):
 graph = ''.join(graph)
 currentIndex = 0
 while currentIndex < len(graph):
-    print(graph[currentIndex:currentIndex+width].replace('0', ' ').replace('1', '+'))
+    print(graph[currentIndex:currentIndex +
+                width].replace('0', '  ').replace('1', '[]'))
     currentIndex += width
