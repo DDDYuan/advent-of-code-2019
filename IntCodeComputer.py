@@ -126,8 +126,9 @@ class IntCodeComputer:
                 result = self.__getValue(firstType, self.__pointer+1)
                 if asciiMode:
                     try:
+                        result = chr(result)
                         if not noPrint:
-                            print(chr(result), end='')
+                            print(result, end='')
                     except ValueError:
                         if not noPrint:
                             print(f'Output: {result}. [TO LARGE IN ASCII MODE]')
