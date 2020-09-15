@@ -50,7 +50,8 @@ class IntCodeComputer:
     def __convertToAsciiList(self, inputValue):
         return [ord(char) for char in inputValue] + [10]
 
-    def runToOutput(self, asciiMode=False):
+    def runToOutput(self, asciiMode=False, noPrint=False, stopAtInput=False):
+        outputs = []
         while not self.__end:
             current = self.__codes[self.__pointer]
             (opCode, firstType, secondType, outType) = self.__parseCommandMode(current)
@@ -100,11 +101,15 @@ class IntCodeComputer:
                 if len(self.__inputs) > 0:
                     inputValue = self.__inputs.pop(0)
                     if not asciiMode:
-                        print(f'Input: {inputValue} [PRESET]')
+                        if not noPrint:
+                            print(f'Input: {inputValue} [PRESET]')
                     else:
-                        print(chr(inputValue), end='')
+                        if not noPrint:
+                            print(chr(inputValue), end='')
                 elif len(self.__innerInputs) > 0:
                     inputValue = self.__innerInputs.pop(0)
+                elif stopAtInput:
+                    return outputs
                 else:
                     userInput = input('Input: ')
                     if asciiMode:
@@ -121,13 +126,19 @@ class IntCodeComputer:
                 result = self.__getValue(firstType, self.__pointer+1)
                 if asciiMode:
                     try:
-                        print(chr(result), end='')
+                        if not noPrint:
+                            print(chr(result), end='')
                     except ValueError:
-                        print(f'Output: {result}. [TO LARGE IN ASCII MODE]')
+                        if not noPrint:
+                            print(f'Output: {result}. [TO LARGE IN ASCII MODE]')
                 else:
-                    print(f'Output: {result}.')
+                    if not noPrint:
+                        print(f'Output: {result}.')
                 self.__pointer += 2
-                return result
+                if stopAtInput:
+                    outputs.append(result)
+                else:
+                    return result
             elif opCode == 9:
                 self.__relativeBase += self.__getValue(firstType, self.__pointer+1)
                 self.__pointer += 2
@@ -138,4 +149,4 @@ class IntCodeComputer:
                 continue
             else:
                 raise Exception(f'NOT A VALID CODE: {opCode}.')
-        return
+        return outputs if stopAtInput else None
