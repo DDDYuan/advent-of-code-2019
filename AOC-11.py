@@ -40,7 +40,7 @@ def getInTrace(x, y):
 
 
 while not robot.isEnd():
-    color = robot.runToOutput()
+    color = robot.runToOutput(noPrint=True)
     currentPanel = getInTrace(currentPosition['x'], currentPosition['y'])
     if color is not None:
         if currentPanel is None:
@@ -49,7 +49,7 @@ while not robot.isEnd():
         else:
             currentPanel['color'] = color
 
-    turn = robot.runToOutput()
+    turn = robot.runToOutput(noPrint=True)
 
     nextFacing = getNextFacing(currentFacing, turn)
     nextPosition = getMovePosition(currentPosition, nextFacing)
@@ -76,7 +76,7 @@ def printGraph():
     for y in range(len(graph)):
         for x in range(len(graph[y])):
             if graph[y][x] == 1:
-                print('[]', end='')
+                print('██', end='')
             else:
                 print('  ', end='')
         print('')
