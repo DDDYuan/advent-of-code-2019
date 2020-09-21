@@ -113,6 +113,7 @@ def mergeList(list, otherList):
         else:
             list.append(item)
 
+
 def cutOffWaste(list, wasteList):
     for waste in wasteList:
         found = findFromList(list, waste['name'])
@@ -128,21 +129,41 @@ def cutOffWaste(list, wasteList):
                 list.remove(found)
 
 
+def getORENeeded(fuelAmount):
+    needs = [{'name': 'FUEL', 'amount': fuelAmount}]
+    wastes = []
 
-needs = [{'name': 'FUEL', 'amount': 1}]
-wastes = []
+    while not onlyORERemain(needs):
+        cutOffWaste(needs, wastes)
+        output = needs.pop(0)
+        if output['name'] == 'ORE':
+            needs.append(output)
+        else:
+            (inputs, waste) = findReaction(reactions,
+                                           output['name']).calculateNeeds(output['amount'])
+            mergeList(needs, inputs)
+            if waste is not None:
+                mergeList(wastes, [waste])
+    ore = needs[0]['amount']
+    print(f'Produce {fuelAmount} FUEL needs {ore} ORE.')
+    return ore
 
 
-while not onlyORERemain(needs):
-    cutOffWaste(needs, wastes)
-    output = needs.pop(0)
-    if output['name'] == 'ORE':
-        needs.append(output)
+cargo = 0
+cargoLimit = 1000000000000
+fuel = 1
+while cargo < cargoLimit:
+    fuel *= 2
+    cargo = getORENeeded(fuel)
+
+print('Start to check')
+limitLow, limitHigh, stepLength = fuel // 2, fuel, fuel // 4
+
+while stepLength >= 1:
+    checkPoint = limitLow + stepLength
+    ore = getORENeeded(checkPoint)
+    if ore > cargoLimit:
+        limitHigh = checkPoint
     else:
-        (inputs, waste) = findReaction(reactions,
-                                       output['name']).calculateNeeds(output['amount'])
-        mergeList(needs, inputs)
-        if waste is not None:
-            mergeList(wastes, [waste])
-    print('Needs ', needs)
-    print('Wastes ', wastes)
+        limitLow = checkPoint
+    stepLength //= 2
