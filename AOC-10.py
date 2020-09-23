@@ -56,14 +56,15 @@ class Vector:
 
     def getTheta(self):
         rad = math.atan2(self.x, self.y)
-        return rad if rad >= 0 else 2*math.pi+rad
+        return rad if rad >= 0 else 2 * math.pi + rad
 
     def getDistance(self):
         return math.sqrt(self.x ** 2 + self.y ** 2)
 
 
 def calculateVector(position, otherPosition):
-    return Vector(otherPosition['x'] - position['x'], position['y'] - otherPosition['y'], otherPosition['x'], otherPosition['y'])
+    return Vector(otherPosition['x'] - position['x'], position['y'] - otherPosition['y'], otherPosition['x'],
+                  otherPosition['y'])
 
 
 starPositions = []
@@ -77,8 +78,8 @@ print(f'All stars is {len(starPositions)}')
 
 max = 0
 for star in starPositions:
-    allVectors = [calculateVector(star, otherStar) for otherStar in starPositions if not(
-        star['x'] == otherStar['x'] and star['y'] == otherStar['y'])]
+    allVectors = [calculateVector(star, otherStar) for otherStar in starPositions if not (
+            star['x'] == otherStar['x'] and star['y'] == otherStar['y'])]
     angles = []
     for vector in allVectors:
         if vector.getTheta() not in angles:
@@ -89,8 +90,8 @@ for star in starPositions:
 
 print(f'Max visible stars is {max} of Star {position}')
 
-vectors = [calculateVector(position, otherPosition) for otherPosition in starPositions if not(
-    position['x'] == otherPosition['x'] and position['y'] == otherPosition['y'])]
+vectors = [calculateVector(position, otherPosition) for otherPosition in starPositions if not (
+        position['x'] == otherPosition['x'] and position['y'] == otherPosition['y'])]
 
 sortedVectors = sorted(sorted(vectors, key=lambda vector: vector.getDistance(
 )), key=lambda vector: vector.getTheta())

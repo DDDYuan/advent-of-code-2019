@@ -6,11 +6,11 @@ height = 6
 currentIndex = 0
 layers = []
 while currentIndex < len(input):
-    layers.append(input[currentIndex:currentIndex+width*height])
-    currentIndex += width*height
+    layers.append(input[currentIndex:currentIndex + width * height])
+    currentIndex += width * height
 
 graph = []
-for index in range(width*height):
+for index in range(width * height):
     color = ' '
     for depth in range(len(layers)):
         if layers[depth][index] != '2':
@@ -22,5 +22,5 @@ graph = ''.join(graph)
 currentIndex = 0
 while currentIndex < len(graph):
     print(graph[currentIndex:currentIndex +
-                width].replace('0', '  ').replace('1', '██'))
+                             width].replace('0', '  ').replace('1', '██'))
     currentIndex += width

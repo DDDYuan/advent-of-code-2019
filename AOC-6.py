@@ -1513,14 +1513,14 @@ for orbit in orbitMap:
 pathOfYou = []
 
 current = findOrbitByName('YOU')
-while(current.previous != None):
+while (current.previous != None):
     pathOfYou.append(current)
     current = current.previous
 
 current = findOrbitByName('SAN')
 common = 'COM'
 foundCommon = False
-while(not foundCommon):
+while (not foundCommon):
     for orbit in pathOfYou:
         if orbit.name == current.name:
             print('FOUND COMMON: ' + orbit.name)
@@ -1532,12 +1532,12 @@ while(not foundCommon):
 sumDepths = 0
 
 current = findOrbitByName('YOU')
-while(current.name != common):
+while (current.name != common):
     sumDepths += 1
     current = current.previous
 
 current = findOrbitByName('SAN')
-while(current.name != common):
+while (current.name != common):
     sumDepths += 1
     current = current.previous
 

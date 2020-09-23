@@ -80,8 +80,10 @@ class Reaction:
 
     def calculateNeeds(self, amount):
         times = math.ceil(amount / self.__output['amount'])
-        return ([{'name': input['name'], 'amount': times*input['amount']} for input in self.__inputs],
-                None if amount - times*self.__output['amount'] == 0 else {'name': self.__output['name'], 'amount': times * self.__output['amount'] - amount})
+        return ([{'name': input['name'], 'amount': times * input['amount']} for input in self.__inputs],
+                None if amount - times * self.__output['amount'] == 0 else {'name': self.__output['name'],
+                                                                            'amount': times * self.__output[
+                                                                                'amount'] - amount})
 
 
 reactions = [Reaction(string) for string in inputs]

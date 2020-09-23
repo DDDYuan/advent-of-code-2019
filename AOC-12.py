@@ -1,5 +1,6 @@
 import math
 
+
 class Coordinate:
     def __init__(self, x, y, z):
         self.__x = x
@@ -38,7 +39,7 @@ class Coordinate:
         else:
             z = 0
         return Coordinate(x, y, z)
-    
+
     def copy(self):
         return Coordinate(self.__x, self.__y, self.__z)
 
@@ -81,13 +82,13 @@ class System:
         self.__stars = [star.copy() for star in stars]
         self.__initStars = [star.copy() for star in stars]
         self.__timeStep = 0
-    
+
     def __str__(self):
-        return f'System at time step {self.__timeStep} is:\n'\
-        + '\n'.join([str(star) for star in self.__stars])\
-        + '\nInit condition is:\n'\
-        + '\n'.join([str(star) for star in self.__initStars])\
-        + f'\nTotal energy is {self.calculateTotalEnergy()}\n'
+        return f'System at time step {self.__timeStep} is:\n' \
+               + '\n'.join([str(star) for star in self.__stars]) \
+               + '\nInit condition is:\n' \
+               + '\n'.join([str(star) for star in self.__initStars]) \
+               + f'\nTotal energy is {self.calculateTotalEnergy()}\n'
 
     def calculateTotalEnergy(self):
         return sum([star.calculateEnergy() for star in self.__stars])
@@ -110,18 +111,19 @@ class System:
         return True
 
 
-def partOne():  
-    system = System(stars=[\
-        Star(position=Coordinate(6,10,10), velocity=Coordinate(0,0,0)),\
-        Star(position=Coordinate(-9,3,17), velocity=Coordinate(0,0,0)),\
-        Star(position=Coordinate(9,-4,14), velocity=Coordinate(0,0,0)),\
-        Star(position=Coordinate(4,14,4), velocity=Coordinate(0,0,0))])
+def partOne():
+    system = System(stars=[ \
+        Star(position=Coordinate(6, 10, 10), velocity=Coordinate(0, 0, 0)), \
+        Star(position=Coordinate(-9, 3, 17), velocity=Coordinate(0, 0, 0)), \
+        Star(position=Coordinate(9, -4, 14), velocity=Coordinate(0, 0, 0)), \
+        Star(position=Coordinate(4, 14, 4), velocity=Coordinate(0, 0, 0))])
 
     system.nextStep()
     while not system.equalToInit():
         print(system)
         system.nextStep()
-    
+
+
 def partTwo():
     xs, xvs = [6, -9, 9, 4], [0, 0, 0, 0]
     ys, yvs = [10, 3, -4, 14], [0, 0, 0, 0]
@@ -139,8 +141,8 @@ def partTwo():
             result.append(total)
         return result
 
-    def sumList(list1,list2):
-        return [list1[i] + list2[i] for i in range(len(list1))] 
+    def sumList(list1, list2):
+        return [list1[i] + list2[i] for i in range(len(list1))]
 
     def calculateReturnToInitSteps(positionList, velocityList):
         step = 0
@@ -153,9 +155,9 @@ def partTwo():
             print(f'At step {step}, position {positionList}, velocity {velocityList}, init {initP}, {initV}')
         print(f'Step {step} to init.')
         return step
-    
+
     def lcm(a, b):
-        return abs(a*b) // math.gcd(a, b)
+        return abs(a * b) // math.gcd(a, b)
 
     def lcmOfList(list):
         result = list[0]
@@ -169,7 +171,6 @@ def partTwo():
 
     print(f'Step for x,y,z axis are {stepx}, {stepy}, {stepz}')
     print(f'The LCM of above is {lcmOfList([stepx, stepy, stepz])}')
-
 
 
 if __name__ == "__main__":
