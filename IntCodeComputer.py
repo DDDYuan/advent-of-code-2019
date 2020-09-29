@@ -1,11 +1,12 @@
 class IntCodeComputer:
     def __init__(self, codes=[], inputs=[]):
-        self.__codes = list(codes)
+        self.__raw = list(codes)
         self.__inputs = inputs
         self.__innerInputs = []
         self.reset()
 
     def reset(self):
+        self.__codes = self.__raw.copy()
         self.__pointer = 0
         self.__relativeBase = 0
         self.__end = False
@@ -28,11 +29,11 @@ class IntCodeComputer:
         outType = fullCommand[-5]
         return (int(opCode), int(firstType), int(secondType), int(outType))
 
-    def __getValue(self, type, index):
-        position = self.__getPosition(type, index)
+    def __getValue(self, type, index, noPrint=False):
+        position = self.__getPosition(type, index, noPrint=noPrint)
         return self.__codes[position]
 
-    def __getPosition(self, type, index):
+    def __getPosition(self, type, index, noPrint=False):
         if type == 0:
             position = self.__codes[index]
         elif type == 1:
@@ -43,7 +44,8 @@ class IntCodeComputer:
             raise Exception(f'INVALID PARAMETER TYPE: {type}.')
         if position >= len(self.__codes):
             memoryTimes = position // len(self.__codes)
-            print(f'Extend memory to {memoryTimes+1} times large.')
+            if not noPrint:
+                print(f'Extend memory to {memoryTimes+1} times large.')
             self.__codes = self.__codes + [0] * memoryTimes * len(self.__codes)
         return position
 
@@ -56,44 +58,44 @@ class IntCodeComputer:
             current = self.__codes[self.__pointer]
             (opCode, firstType, secondType, outType) = self.__parseCommandMode(current)
             if opCode == 1:
-                firstNumber = self.__getValue(firstType, self.__pointer+1)
-                secondNumber = self.__getValue(secondType, self.__pointer+2)
-                position = self.__getPosition(outType, self.__pointer+3)
+                firstNumber = self.__getValue(firstType, self.__pointer+1, noPrint=noPrint)
+                secondNumber = self.__getValue(secondType, self.__pointer+2, noPrint=noPrint)
+                position = self.__getPosition(outType, self.__pointer+3, noPrint=noPrint)
                 self.__codes[position] = firstNumber + secondNumber
                 self.__pointer += 4
                 continue
             elif opCode == 2:
-                firstNumber = self.__getValue(firstType, self.__pointer+1)
-                secondNumber = self.__getValue(secondType, self.__pointer+2)
-                position = self.__getPosition(outType, self.__pointer+3)
+                firstNumber = self.__getValue(firstType, self.__pointer+1, noPrint=noPrint)
+                secondNumber = self.__getValue(secondType, self.__pointer+2, noPrint=noPrint)
+                position = self.__getPosition(outType, self.__pointer+3, noPrint=noPrint)
                 self.__codes[position] = firstNumber * secondNumber
                 self.__pointer += 4
                 continue
             elif opCode == 5:
-                condition = self.__getValue(firstType, self.__pointer+1)
+                condition = self.__getValue(firstType, self.__pointer+1, noPrint=noPrint)
                 if condition != 0:
-                    self.__pointer = self.__getValue(secondType, self.__pointer+2)
+                    self.__pointer = self.__getValue(secondType, self.__pointer+2, noPrint=noPrint)
                 else:
                     self.__pointer += 3
                 continue
             elif opCode == 6:
-                condition = self.__getValue(firstType, self.__pointer+1)
+                condition = self.__getValue(firstType, self.__pointer+1, noPrint=noPrint)
                 if condition == 0:
-                    self.__pointer = self.__getValue(secondType, self.__pointer+2)
+                    self.__pointer = self.__getValue(secondType, self.__pointer+2, noPrint=noPrint)
                 else:
                     self.__pointer += 3
                 continue
             elif opCode == 7:
-                firstNumber = self.__getValue(firstType, self.__pointer+1)
-                secondNumber = self.__getValue(secondType, self.__pointer+2)
-                position = self.__getPosition(outType, self.__pointer+3)
+                firstNumber = self.__getValue(firstType, self.__pointer+1, noPrint=noPrint)
+                secondNumber = self.__getValue(secondType, self.__pointer+2, noPrint=noPrint)
+                position = self.__getPosition(outType, self.__pointer+3, noPrint=noPrint)
                 self.__codes[position] = 1 if firstNumber < secondNumber else 0
                 self.__pointer += 4
                 continue
             elif opCode == 8:
-                firstNumber = self.__getValue(firstType, self.__pointer+1)
-                secondNumber = self.__getValue(secondType, self.__pointer+2)
-                position = self.__getPosition(outType, self.__pointer+3)
+                firstNumber = self.__getValue(firstType, self.__pointer+1, noPrint=noPrint)
+                secondNumber = self.__getValue(secondType, self.__pointer+2, noPrint=noPrint)
+                position = self.__getPosition(outType, self.__pointer+3, noPrint=noPrint)
                 self.__codes[position] = 1 if firstNumber == secondNumber else 0
                 self.__pointer += 4
                 continue
@@ -118,12 +120,12 @@ class IntCodeComputer:
                         self.__innerInputs += codeList
                     else:
                         inputValue = userInput
-                position = self.__getPosition(firstType, self.__pointer+1)
+                position = self.__getPosition(firstType, self.__pointer+1, noPrint=noPrint)
                 self.__codes[position] = int(inputValue)
                 self.__pointer += 2
                 continue
             elif opCode == 4:
-                result = self.__getValue(firstType, self.__pointer+1)
+                result = self.__getValue(firstType, self.__pointer+1, noPrint=noPrint)
                 if asciiMode:
                     try:
                         result = chr(result)
@@ -141,7 +143,7 @@ class IntCodeComputer:
                 else:
                     return result
             elif opCode == 9:
-                self.__relativeBase += self.__getValue(firstType, self.__pointer+1)
+                self.__relativeBase += self.__getValue(firstType, self.__pointer+1, noPrint=noPrint)
                 self.__pointer += 2
                 continue
             elif opCode == 99:
