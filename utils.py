@@ -27,3 +27,13 @@ def printGraph(graph, legend, clearScreen=False):
         for x in range(len(graph[y])):
             print(legend[graph[y][x]], end='')
         print('')
+
+
+def parseGraph(rawInput):
+    graph = []
+    for row in rawInput.split('\n'):
+        rowArray = []
+        for item in row:
+            rowArray.append(item)
+        graph.append(rowArray)
+    return graph
