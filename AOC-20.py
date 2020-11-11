@@ -58,6 +58,44 @@ YN......#               VT..#....QG
            B   J   C               
            U   P   P               '''
 
+testDonut3 = '''             Z L X W       C                 
+             Z P Q B       K                 
+  ###########.#.#.#.#######.###############  
+  #...#.......#.#.......#.#.......#.#.#...#  
+  ###.#.#.#.#.#.#.#.###.#.#.#######.#.#.###  
+  #.#...#.#.#...#.#.#...#...#...#.#.......#  
+  #.###.#######.###.###.#.###.###.#.#######  
+  #...#.......#.#...#...#.............#...#  
+  #.#########.#######.#.#######.#######.###  
+  #...#.#    F       R I       Z    #.#.#.#  
+  #.###.#    D       E C       H    #.#.#.#  
+  #.#...#                           #...#.#  
+  #.###.#                           #.###.#  
+  #.#....OA                       WB..#.#..ZH
+  #.###.#                           #.#.#.#  
+CJ......#                           #.....#  
+  #######                           #######  
+  #.#....CK                         #......IC
+  #.###.#                           #.###.#  
+  #.....#                           #...#.#  
+  ###.###                           #.#.#.#  
+XF....#.#                         RF..#.#.#  
+  #####.#                           #######  
+  #......CJ                       NM..#...#  
+  ###.#.#                           #.###.#  
+RE....#.#                           #......RF
+  ###.###        X   X       L      #.#.#.#  
+  #.....#        F   Q       P      #.#.#.#  
+  ###.###########.###.#######.#########.###  
+  #.....#...#.....#.......#...#.....#.#...#  
+  #####.#.###.#######.#######.###.###.#.#.#  
+  #.......#.......#.#.#.#.#...#...#...#.#.#  
+  #####.###.#####.#.#.#.#.###.###.#.###.###  
+  #.......#.....#.#...#...............#...#  
+  #############.#.#.###.###################  
+               A O F   N                     
+               A A D   M                     '''
+
 donut = '''                                         S       U A   R     G     V       B       L                                       
                                          X       Y A   U     T     M       Y       G                                       
   #######################################.#######.#.###.#####.#####.#######.#######.#####################################  
@@ -193,6 +231,7 @@ def getNodeInfo(x, y, grid):
         else:
             position = (x + 2, y)
             portal = (x + 1, y)
+        layerDiff = -1 if x == 0 or x + 1 == len(grid[y]) - 1 else 1
     elif y + 1 < len(grid) and 'A' <= grid[y + 1][x] <= 'Z':
         nextCharacter = grid[y + 1][x]
         if y - 1 >= 0 and grid[y - 1][x] == '.':
@@ -201,9 +240,10 @@ def getNodeInfo(x, y, grid):
         else:
             position = (x, y + 2)
             portal = (x, y + 1)
+        layerDiff = -1 if y == 0 or y + 1 == len(grid) - 1 else 1
     else:
         return None
-    return firstCharacter + nextCharacter, position, portal
+    return firstCharacter + nextCharacter, position, portal, layerDiff
 
 
 def parseGrid(grid):
@@ -219,7 +259,7 @@ def parseGrid(grid):
 
 
 def findPortalPair(portals, portalName):
-    return [(position, portalPosition) for (name, position, portalPosition) in portals if name == portalName]
+    return [(position, portalPosition, layerDiff) for (name, position, portalPosition, layerDiff) in portals if name == portalName]
 
 
 def parsePortals(portals):
@@ -228,44 +268,88 @@ def parsePortals(portals):
     end = None
 
     for portal in portals:
-        name, position, teleportPosition = portal
+        name, position, teleportPosition, layerDiff = portal
         if name == 'AA':
             start = position
         elif name == 'ZZ':
             end = position
         else:
-            [(position1, portal1), (position2, portal2)] = findPortalPair(portals, name)
-            link[portal1] = position2
-            link[portal2] = position1
+            [(position1, portal1, layerDiff1), (position2, portal2, layerDiff2)] = findPortalPair(portals, name)
+            link[portal1] = (position2, layerDiff1)
+            link[portal2] = (position1, layerDiff2)
     return start, end, link
+
+
+def calculateSteps(pos, target, previous):
+    distance = 0
+    current = pos
+    while current != (target, 0):
+        print(current)
+        current = previous[current]
+        distance += 1
+    print('===================')
+    return distance
 
 
 def getMinSteps(grid, start, end, portals):
     frontier = [(start, 0)]
     reached = []
+    previous = dict()
 
-    def notInFrontier(fx, fy):
-        for (cx, cy), d in frontier:
-            if (cx, cy) == (fx, fy):
-                return False
-        return True
+    endFrontier = [(end, 0)]
+    endReached = []
+    endPrevious = dict()
 
-    while len(frontier) > 0:
-        (x, y), distance = frontier.pop(0)
-        if (x, y) == end:
-            return distance
-        else:
-            reached.append((x, y))
-            for (nextX, nextY) in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]:
-                if 0 <= nextY < len(grid) and 0 <= nextX < len(grid[nextY]):
-                    nodeName = grid[nextY][nextX]
-                    if nodeName == '.' or (nextX, nextY) in portals:
-                        (frontierX, frontierY) = (nextX, nextY) if nodeName == '.' else portals.get((nextX, nextY))
-                        if (frontierX, frontierY) not in reached and notInFrontier(frontierX, frontierY):
-                            frontier.append(((frontierX, frontierY), distance + 1))
+    while len(frontier) + len(endFrontier) > 0:
+        if len(frontier) > 0:
+            (x, y), layer = frontier.pop(0)
+            print(f'Current {x}, {y} at layer {layer} from start')
+            if ((x, y), layer) in endReached:
+                return calculateSteps(((x, y), layer), start, previous)\
+                       + calculateSteps(((x, y), layer), end, endPrevious)
+            else:
+                reached.append(((x, y), layer))
+                for (nextX, nextY) in [(x, y + 1), (x, y - 1), (x + 1, y), (x - 1, y)]:
+                    if 0 <= nextY < len(grid) and 0 <= nextX < len(grid[nextY]):
+                        nodeName = grid[nextY][nextX]
+                        if nodeName == '.' or (nextX, nextY) in portals:
+                            if nodeName == '.':
+                                (frontierX, frontierY) = (nextX, nextY)
+                                frontierLayer = layer
+                            else:
+                                (frontierX, frontierY), layerDiff = portals.get((nextX, nextY))
+                                frontierLayer = layer + layerDiff
+                            if frontierLayer >= 0\
+                                    and ((frontierX, frontierY), frontierLayer) not in reached\
+                                    and ((frontierX, frontierY), frontierLayer) not in frontier:
+                                previous[((frontierX, frontierY), frontierLayer)] = ((x, y), layer)
+                                frontier.append(((frontierX, frontierY), frontierLayer))
+        if len(endFrontier) > 0:
+            (x, y), layer = endFrontier.pop(0)
+            print(f'Current {x}, {y} at layer {layer} from end')
+            if ((x, y), layer) in reached:
+                return calculateSteps(((x, y), layer), start, previous) \
+                       + calculateSteps(((x, y), layer), end, endPrevious)
+            else:
+                endReached.append(((x, y), layer))
+                for (nextX, nextY) in [(x, y + 1), (x, y - 1), (x + 1, y), (x - 1, y)]:
+                    if 0 <= nextY < len(grid) and 0 <= nextX < len(grid[nextY]):
+                        nodeName = grid[nextY][nextX]
+                        if nodeName == '.' or (nextX, nextY) in portals:
+                            if nodeName == '.':
+                                (frontierX, frontierY) = (nextX, nextY)
+                                frontierLayer = layer
+                            else:
+                                (frontierX, frontierY), layerDiff = portals.get((nextX, nextY))
+                                frontierLayer = layer + layerDiff
+                            if frontierLayer >= 0 \
+                                    and ((frontierX, frontierY), frontierLayer) not in endReached \
+                                    and ((frontierX, frontierY), frontierLayer) not in endFrontier:
+                                endPrevious[((frontierX, frontierY), frontierLayer)] = ((x, y), layer)
+                                endFrontier.append(((frontierX, frontierY), frontierLayer))
 
 
 if __name__ == '__main__':
-    raw = utils.parseGraph(donut)
+    raw = utils.parseGraph(testDonut3)
     s, e, p = parsePortals(parseGrid(raw))
     print(getMinSteps(raw, s, e, p))
