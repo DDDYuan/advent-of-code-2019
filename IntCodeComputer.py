@@ -113,7 +113,7 @@ class IntCodeComputer:
                 elif stopAtInput:
                     return outputs
                 else:
-                    userInput = input('Input: ')
+                    userInput = input('')
                     if asciiMode:
                         codeList = self.__convertToAsciiList(userInput)
                         inputValue = codeList.pop(0)
