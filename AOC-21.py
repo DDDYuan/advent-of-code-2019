@@ -88,15 +88,20 @@ program = [109, 2050, 21102, 966, 1, 1, 21102, 13, 1, 0, 1106, 0, 1378, 21102, 2
            -2, 22202, -3, -2, -3, 22107, 0, -4, -1, 1206, -1, 2037, 21201, -2, 0, 1, 21101, 0, 2037, 0, 105, 1, 1912,
            21202, -3, -1, -3, 22201, -5, -3, -5, 109, -6, 2105, 1, 0]
 
-
 if __name__ == '__main__':
-    inputs = ['NOT A J',
-              'NOT B T',
-              'OR T J',
-              'NOT C T',
-              'OR T J',
-              'AND D J',
-              'WALK']
+    inputs = [
+        'OR A T',
+        'AND B T',
+        'AND C T',
+        'NOT T T',
+        'OR E J',
+        'AND I J',
+        'OR H J',
+        'AND T J',
+        'AND D J',
+        'NOT A T',
+        'OR T J',
+        'RUN']
     droid = IntCodeComputer(program)
     droid.appendInputs(inputs, asciiMode=True)
     while not droid.isEnd():
